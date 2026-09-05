@@ -1,0 +1,10 @@
+^C:\USERS\AHMED\ONEDRIVE\DESKTOP\TODO_APP\BUILD\WINDOWS\X64\CMAKEFILES\413B9FF486A95745B689B36842898823\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/Ahmed/OneDrive/Desktop/todo_app/windows -BC:/Users/Ahmed/OneDrive/Desktop/todo_app/build/windows/x64 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Ahmed/OneDrive/Desktop/todo_app/build/windows/x64/todo_app.slnx
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

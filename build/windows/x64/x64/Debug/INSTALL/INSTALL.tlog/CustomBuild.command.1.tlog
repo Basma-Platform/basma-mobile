@@ -1,0 +1,10 @@
+^C:\USERS\AHMED\ONEDRIVE\DESKTOP\TODO_APP\BUILD\WINDOWS\X64\CMAKEFILES\413B9FF486A95745B689B36842898823\INSTALL_FORCE.RULE
+setlocal
+cd .
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
