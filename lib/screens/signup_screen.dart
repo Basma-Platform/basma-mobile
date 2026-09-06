@@ -95,8 +95,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _agreeToTerms = false;
   bool _isLoading = false;
 
+  String _selectedPhoneCode = '+970';
   String _selectedGovernorate = '';
   String _selectedCity = '';
+
+  final List<String> _phoneCodes = ['+970', '+972'];
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -331,21 +334,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '+970',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.darkGray,
-                          ),
-                        ),
-                        const Icon(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedPhoneCode,
+                        items: _phoneCodes
+                            .map(
+                              (code) => DropdownMenuItem<String>(
+                                value: code,
+                                child: Text(
+                                  code,
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.darkGray,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _selectedPhoneCode = value;
+                            });
+                          }
+                        },
+                        icon: const Icon(
                           Icons.arrow_drop_down,
                           color: AppColors.mediumGray,
                           size: 18,
                         ),
-                      ],
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.darkGray,
+                        ),
+                        dropdownColor: AppColors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
