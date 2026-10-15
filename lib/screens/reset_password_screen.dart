@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
+import '../services/auth_service.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
+  final String token;
 
-  const ResetPasswordScreen({super.key, required this.email});
+  const ResetPasswordScreen({super.key, required this.email, required this.token});
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -41,28 +43,26 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Future<void> _handleResetPassword() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      // TODO: Implement actual reset password logic
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تم تغيير كلمة المرور بنجاح!'),
-            backgroundColor: AppColors.successGreen,
-          ),
-        );
-        _navigateToLogin();
-      }
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _isLoading = true);
+    try {
+      await AuthService.instance.resetPassword(
+        email: widget.email,
+        token: widget.token,
+        password: _newPasswordController.text,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم تغيير كلمة المرور بنجاح!')),
+      );
+      _navigateToLogin();
+    } on AuthApiException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message), backgroundColor: AppColors.errorRed),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

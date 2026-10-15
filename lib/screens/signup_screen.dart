@@ -1,79 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
-
-class _EmailVerificationPlaceholderScreen extends StatelessWidget {
-  const _EmailVerificationPlaceholderScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.cream,
-      appBar: AppBar(
-        backgroundColor: AppColors.cream,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_forward_rounded),
-            color: AppColors.primaryOrange,
-          ),
-        ],
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.mark_email_unread_outlined,
-                size: 72,
-                color: AppColors.primaryOrange,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'تحقق البريد الإلكتروني',
-                style: AppTextStyles.headlineMedium,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.darkGray,
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryOrange,
-                    foregroundColor: AppColors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text('العودة إلى تسجيل الدخول'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+import 'verify_email_screen.dart';
+import 'authenticated_screen.dart';
+import '../services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -100,21 +30,45 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final List<String> _governorates = [
-    'شمال غزة',
-    'غزة',
-    'دير البلح',
-    'خان يونس',
-    'رفح',
-  ];
+  List<BasmaRegion> _governorates = [];
+  List<BasmaRegion> _cities = [];
+  String? _regionError;
 
-  final Map<String, List<String>> _cities = {
-    'شمال غزة': ['جباليا', 'بيت لاهيا', 'بيت حانون'],
-    'غزة': ['غزة المدينة', 'الشجاعية', 'الزيتون', 'الرمال'],
-    'دير البلح': ['دير البلح', 'النصيرات', 'البريج', 'المغازي'],
-    'خان يونس': ['خان يونس', 'بني سهيلا', 'عبسان', 'خزاعة'],
-    'رفح': ['رفح', 'الشوكة', 'البيوك'],
-  };
+  @override
+  void initState() {
+    super.initState();
+    _loadGovernorates();
+  }
+
+  Future<void> _loadGovernorates() async {
+    try {
+      final regions = await AuthService.instance.getGovernorates();
+      if (mounted) setState(() {
+        _governorates = regions;
+        _regionError = null;
+      });
+    } on AuthApiException catch (error) {
+      if (mounted) setState(() => _regionError = error.message);
+    }
+  }
+
+  Future<void> _loadCities(String governorateId) async {
+    setState(() {
+      _selectedCity = '';
+      _cities = [];
+      _regionError = null;
+    });
+    try {
+      final cities = await AuthService.instance.getCities(int.parse(governorateId));
+      if (mounted && _selectedGovernorate == governorateId) {
+        setState(() => _cities = cities);
+      }
+    } on AuthApiException catch (error) {
+      if (mounted && _selectedGovernorate == governorateId) {
+        setState(() => _regionError = error.message);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -134,44 +88,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _handleSignUp() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      if (!_agreeToTerms) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('يجب الموافقة على شروط الاستخدام'),
-            backgroundColor: AppColors.errorRed,
-          ),
-        );
-        return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!_agreeToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يجب الموافقة على شروط الاستخدام')),
+      );
+      return;
+    }
+    setState(() => _isLoading = true);
+    try {
+      var phone = _whatsappController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      if (phone.startsWith('970')) {
+        phone = '+' + phone;
+      } else {
+        if (phone.startsWith('0')) phone = phone.substring(1);
+        phone = '+970' + phone;
       }
-
-      setState(() {
-        _isLoading = true;
-      });
-
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      // TODO: Implement actual sign up logic
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تم إنشاء الحساب بنجاح!'),
-            backgroundColor: AppColors.successGreen,
-          ),
-        );
-        // Navigate to email verification
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const _EmailVerificationPlaceholderScreen(),
-          ),
-        );
-      }
+      final user = await AuthService.instance.register(
+        name: _fullNameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        whatsapp: phone,
+        governorateId: int.parse(_selectedGovernorate),
+        cityId: int.parse(_selectedCity),
+        termsAccepted: _agreeToTerms,
+      );
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => user.isEmailVerified
+              ? AuthenticatedScreen(user: user)
+              : VerifyEmailScreen(email: user.email),
+        ),
+        (_) => false,
+      );
+    } on AuthApiException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message), backgroundColor: AppColors.errorRed),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -479,10 +437,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ? null
                     : _selectedGovernorate,
                 hint: const Text('اختر المحافظة'),
-                items: _governorates.map((String value) {
+                items: _governorates.map((BasmaRegion region) {
                   return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
+                    value: region.id.toString(),
+                    child: Text(region.name),
                   );
                 }).toList(),
                 onChanged: (String? newValue) {
@@ -490,6 +448,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     _selectedGovernorate = newValue ?? '';
                     _selectedCity = '';
                   });
+                  if (newValue != null) _loadCities(newValue);
                 },
                 decoration: const InputDecoration(
                   labelText: 'المحافظة',
@@ -511,10 +470,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 initialValue: _selectedCity.isEmpty ? null : _selectedCity,
                 hint: const Text('اختر المدينة/الحي'),
                 items: _selectedGovernorate.isNotEmpty
-                    ? (_cities[_selectedGovernorate] ?? []).map((String value) {
+                    ? _cities.map((BasmaRegion region) {
                         return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
+                          value: region.id.toString(),
+                          child: Text(region.name),
                         );
                       }).toList()
                     : [],
@@ -538,6 +497,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   return null;
                 },
               ),
+              if (_regionError != null)
+                Text(_regionError!, style: const TextStyle(color: AppColors.errorRed)),
               const SizedBox(height: 16),
               Row(
                 children: [

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
+import '../services/auth_service.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
-  const VerifyEmailScreen({super.key});
+  const VerifyEmailScreen({super.key, required this.email});
+  final String email;
 
   @override
   State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
@@ -11,6 +13,7 @@ class VerifyEmailScreen extends StatefulWidget {
 
 class _VerifyEmailScreenState extends State<VerifyEmailScreen>
     with SingleTickerProviderStateMixin {
+  bool _resending = false;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
@@ -44,13 +47,23 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
     );
   }
 
-  void _resendEmail() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('تم إعادة إرسال رابط التفعيل'),
-        backgroundColor: AppColors.successGreen,
-      ),
-    );
+  Future<void> _resendEmail() async {
+    if (_resending) return;
+    setState(() => _resending = true);
+    try {
+      await AuthService.instance.resendVerification(widget.email);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم إرسال رابط التفعيل إلى بريدك')),
+      );
+    } on AuthApiException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message), backgroundColor: AppColors.errorRed),
+      );
+    } finally {
+      if (mounted) setState(() => _resending = false);
+    }
   }
 
   @override
@@ -191,7 +204,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'example@email.com',
+                                widget.email,
                                 style: AppTextStyles.titleSmall.copyWith(
                                   color: AppColors.primaryOrange,
                                 ),
@@ -238,7 +251,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
                             ),
                             const SizedBox(height: 4),
                             TextButton(
-                              onPressed: _resendEmail,
+                              onPressed: _resending ? null : _resendEmail,
                               style: TextButton.styleFrom(
                                 foregroundColor: AppColors.primaryOrange,
                                 textStyle: const TextStyle(
