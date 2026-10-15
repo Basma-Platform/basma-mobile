@@ -7,7 +7,9 @@ String _apiBaseUrl() {
     'BASMA_API_BASE_URL',
     defaultValue: 'https://basma-backend.onrender.com',
   );
-  return '${origin.replaceFirst(RegExp(r'/
+  return origin.endsWith('/') ? origin : '$origin/';
+}
+
 /// Laravel Sanctum uses a CSRF cookie and a session cookie, not an invented token.
 class AuthService {
   AuthService._()
