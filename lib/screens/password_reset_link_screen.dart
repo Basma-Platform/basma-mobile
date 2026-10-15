@@ -10,7 +10,8 @@ class PasswordResetLinkScreen extends StatefulWidget {
   final String email;
 
   @override
-  State<PasswordResetLinkScreen> createState() => _PasswordResetLinkScreenState();
+  State<PasswordResetLinkScreen> createState() =>
+      _PasswordResetLinkScreenState();
 }
 
 class _PasswordResetLinkScreenState extends State<PasswordResetLinkScreen> {
@@ -35,7 +36,10 @@ class _PasswordResetLinkScreenState extends State<PasswordResetLinkScreen> {
     } on AuthApiException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message), backgroundColor: AppColors.errorRed),
+        SnackBar(
+          content: Text(error.message),
+          backgroundColor: AppColors.errorRed,
+        ),
       );
     } finally {
       if (mounted) setState(() => _resending = false);
@@ -54,13 +58,20 @@ class _PasswordResetLinkScreenState extends State<PasswordResetLinkScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.mark_email_unread_outlined,
-                  color: AppColors.primaryOrange, size: 70),
+              const Icon(
+                Icons.mark_email_unread_outlined,
+                color: AppColors.primaryOrange,
+                size: 70,
+              ),
               const SizedBox(height: 16),
-              Text('تحقق من بريدك الإلكتروني', style: AppTextStyles.headlineMedium),
+              Text(
+                'تحقق من بريدك الإلكتروني',
+                style: AppTextStyles.headlineMedium,
+              ),
               const SizedBox(height: 12),
-              Text('أرسلنا رابط إعادة تعيين كلمة المرور إلى ' + widget.email +
-                  '. يمكنك فتح الرابط في المتصفح لإكمال العملية.'),
+              Text(
+                'أرسلنا رابط إعادة تعيين كلمة المرور إلى ${widget.email}. يمكنك فتح الرابط في المتصفح لإكمال العملية.',
+              ),
               const SizedBox(height: 24),
               const Text('إذا كان لديك رمز الاستعادة من الرابط، ألصقه هنا:'),
               const SizedBox(height: 12),
@@ -68,19 +79,23 @@ class _PasswordResetLinkScreenState extends State<PasswordResetLinkScreen> {
                 controller: _tokenController,
                 autocorrect: false,
                 validator: (value) => value == null || value.trim().isEmpty
-                    ? 'رمز الاستعادة مطلوب' : null,
+                    ? 'رمز الاستعادة مطلوب'
+                    : null,
                 decoration: const InputDecoration(labelText: 'رمز الاستعادة'),
               ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
                   if (!(_formKey.currentState?.validate() ?? false)) return;
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (_) => ResetPasswordScreen(
-                      email: widget.email,
-                      token: _tokenController.text.trim(),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ResetPasswordScreen(
+                        email: widget.email,
+                        token: _tokenController.text.trim(),
+                      ),
                     ),
-                  ));
+                  );
                 },
                 child: const Text('متابعة إعادة تعيين كلمة المرور'),
               ),

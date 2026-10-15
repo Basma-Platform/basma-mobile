@@ -30,13 +30,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => PasswordResetLinkScreen(email: _emailController.text.trim()),
+          builder: (_) =>
+              PasswordResetLinkScreen(email: _emailController.text.trim()),
         ),
       );
     } on AuthApiException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message), backgroundColor: AppColors.errorRed),
+        SnackBar(
+          content: Text(error.message),
+          backgroundColor: AppColors.errorRed,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

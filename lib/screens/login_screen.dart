@@ -50,7 +50,10 @@ class _LoginScreenState extends State<LoginScreen> {
     } on AuthApiException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message), backgroundColor: AppColors.errorRed),
+        SnackBar(
+          content: Text(error.message),
+          backgroundColor: AppColors.errorRed,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

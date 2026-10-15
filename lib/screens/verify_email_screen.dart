@@ -59,7 +59,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
     } on AuthApiException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message), backgroundColor: AppColors.errorRed),
+        SnackBar(
+          content: Text(error.message),
+          backgroundColor: AppColors.errorRed,
+        ),
       );
     } finally {
       if (mounted) setState(() => _resending = false);

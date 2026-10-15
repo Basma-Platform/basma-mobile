@@ -43,10 +43,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> _loadGovernorates() async {
     try {
       final regions = await AuthService.instance.getGovernorates();
-      if (mounted) setState(() {
-        _governorates = regions;
-        _regionError = null;
-      });
+      if (mounted) {
+        setState(() {
+          _governorates = regions;
+          _regionError = null;
+        });
+      }
     } on AuthApiException catch (error) {
       if (mounted) setState(() => _regionError = error.message);
     }
@@ -59,7 +61,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _regionError = null;
     });
     try {
-      final cities = await AuthService.instance.getCities(int.parse(governorateId));
+      final cities = await AuthService.instance.getCities(
+        int.parse(governorateId),
+      );
       if (mounted && _selectedGovernorate == governorateId) {
         setState(() => _cities = cities);
       }
@@ -99,10 +103,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     try {
       var phone = _whatsappController.text.replaceAll(RegExp(r'[^0-9]'), '');
       if (phone.startsWith('970')) {
-        phone = '+' + phone;
+        phone = '+$phone';
       } else {
         if (phone.startsWith('0')) phone = phone.substring(1);
-        phone = '+970' + phone;
+        phone = '+970$phone';
       }
       final user = await AuthService.instance.register(
         name: _fullNameController.text.trim(),
@@ -126,7 +130,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } on AuthApiException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message), backgroundColor: AppColors.errorRed),
+        SnackBar(
+          content: Text(error.message),
+          backgroundColor: AppColors.errorRed,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -498,7 +505,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 },
               ),
               if (_regionError != null)
-                Text(_regionError!, style: const TextStyle(color: AppColors.errorRed)),
+                Text(
+                  _regionError!,
+                  style: const TextStyle(color: AppColors.errorRed),
+                ),
               const SizedBox(height: 16),
               Row(
                 children: [

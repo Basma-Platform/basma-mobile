@@ -27,9 +27,9 @@ class _AuthenticatedScreenState extends State<AuthenticatedScreen> {
       );
     } on AuthApiException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -45,13 +45,22 @@ class _AuthenticatedScreenState extends State<AuthenticatedScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.verified_user_outlined, size: 60, color: AppColors.primaryOrange),
+            const Icon(
+              Icons.verified_user_outlined,
+              size: 60,
+              color: AppColors.primaryOrange,
+            ),
             const SizedBox(height: 16),
-            Text('مرحبًا ' + widget.user.name, style: AppTextStyles.headlineMedium),
+            Text(
+              'مرحبًا ${widget.user.name}',
+              style: AppTextStyles.headlineMedium,
+            ),
             const SizedBox(height: 8),
             Text(widget.user.email),
             const SizedBox(height: 24),
-            const Text('تم تسجيل الدخول. ستتوفر خدمات المنصة في التحديثات القادمة.'),
+            const Text(
+              'تم تسجيل الدخول. ستتوفر خدمات المنصة في التحديثات القادمة.',
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _loading ? null : _logout,

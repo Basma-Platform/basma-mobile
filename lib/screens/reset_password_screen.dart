@@ -7,7 +7,11 @@ class ResetPasswordScreen extends StatefulWidget {
   final String email;
   final String token;
 
-  const ResetPasswordScreen({super.key, required this.email, required this.token});
+  const ResetPasswordScreen({
+    super.key,
+    required this.email,
+    required this.token,
+  });
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -59,7 +63,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     } on AuthApiException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message), backgroundColor: AppColors.errorRed),
+        SnackBar(
+          content: Text(error.message),
+          backgroundColor: AppColors.errorRed,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
