@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import 'otp_verification_screen.dart';
+import 'password_reset_link_screen.dart';
+import '../services/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -22,19 +23,28 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<void> _sendOtp() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            OtpVerificationScreen(email: _emailController.text.trim()),
-      ),
-    );
+    try {
+      await AuthService.instance.forgotPassword(_emailController.text.trim());
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              PasswordResetLinkScreen(email: _emailController.text.trim()),
+        ),
+      );
+    } on AuthApiException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message),
+          backgroundColor: AppColors.errorRed,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -60,7 +70,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'أدخل بريدك الإلكتروني لإرسال رمز التحقق',
+                        'أدخل بريدك الإلكتروني لإرسال رابط إعادة تعيين كلمة المرور',
                         style: AppTextStyles.bodyLarge.copyWith(
                           color: AppColors.darkGray,
                         ),
@@ -166,7 +176,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         strokeWidth: 2,
                       ),
                     )
-                  : const Text('إرسال رمز التحقق'),
+                  : const Text('إرسال رابط الاستعادة'),
             ),
           ),
         ],
